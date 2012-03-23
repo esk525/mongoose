@@ -269,6 +269,11 @@ module.exports = {
     Tobi.path('friends').doValidate(1, function(err){
       err.should.be.an.instanceof(ValidatorError);
     });
+
+    // null is allowed
+    Tobi.path('friends').doValidate(null, function(err){
+      should.strictEqual(err, null);
+    });
   },
 
   'test number required validation': function(){
@@ -612,8 +617,9 @@ module.exports = {
   },
 
   'test setters scope': function(){
-    function lowercase (v) {
+    function lowercase (v, self) {
       this.a.should.eql('b');
+      self.path.should.eql('name');
       return v.toLowerCase();
     };
 
@@ -662,8 +668,9 @@ module.exports = {
   },
 
   'test getters scope': function(){
-    function woot (v) {
+    function woot (v, self) {
       this.a.should.eql('b');
+      self.path.should.eql('name');
       return v.toLowerCase();
     };
 
@@ -853,6 +860,14 @@ module.exports = {
   'allow disabling the auto .id virtual': function () {
     var schema = new Schema({ name: String }, { noVirtualId: true });
     should.strictEqual(undefined, schema.virtuals.id);
+  },
+
+  'selected option': function () {
+    var s = new Schema({ thought: { type: String, select: false }});
+    s.path('thought').selected.should.be.false;
+
+    var a = new Schema({ thought: { type: String, select: true }});
+    a.path('thought').selected.should.be.true;
   },
 
   'schema creation works with objects from other contexts': function () {
